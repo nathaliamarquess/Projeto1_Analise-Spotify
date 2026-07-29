@@ -1,7 +1,7 @@
 # Projeto1_Analise-Spotify
 Projeto de análise de dados do Spotify utilizando SQL no Google BigQuery e Looker Studio. Realizei limpeza, transformação e análise exploratória dos dados para responder perguntas de negócio, identificar padrões de streams e desenvolver um dashboard com os principais insights.
 
--- Identificando valores nulos na tabela "track_in_competition"
+# Identificando valores nulos na tabela "track_in_competition"
 
 SELECT COUNT (*)
 FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
@@ -31,15 +31,16 @@ SELECT *
 FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
 WHERE in_shazam_charts IS NULL;
 
--- Encontrado 50 valores nulos na coluna in_shazam_charts de um total de 953 valores.
+> Encontrado 50 valores nulos na coluna in_shazam_charts de um total de 953 valores.
 
 SELECT COUNT(*) AS quantidade_zero
 FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
 WHERE in_shazam_charts = 0;
 
--- Na coluna in_shazam_charts, existem 344 valores como "0", acredito que "0" signifique que a música não entrou no ranking e que o "null" signifique ausência de informação. Descobri o nome de 3 músicas com valores nulos, na coluna in_shazam_charts, através do id na tabela spotify, depois pesquisei um por um no google e constatei que realmente não entraram no ranking, por isso vou considerar os "null" como "0".
+> Na coluna in_shazam_charts, existem 344 valores como "0", acredito que "0" signifique que a música não entrou no ranking e que o "null" signifique ausência de informação. Descobri o nome de 3 músicas com valores nulos, na coluna in_shazam_charts, através do id na tabela spotify, depois pesquisei um por um no google e constatei que realmente não entraram no ranking, por isso vou considerar os "null" como "0".
 
--- Identificando valores nulos na tabela "track_in_spotify"
+
+# Identificando valores nulos na tabela "track_in_spotify"
 
 SELECT COUNT (*) 
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
@@ -66,13 +67,13 @@ FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
 WHERE artists_name = "Taylor Swift";
 
 
--- Encontrado 1 valor nulo na coluna main_music_genre, como a linha é da música Style da Taylor Swift, pesquisei no google o gênero que é pop e decidi alterar "null" por "Pop" (como está escrita a maioria das suas músicas).
+> Encontrado 1 valor nulo na coluna main_music_genre, como a linha é da música Style da Taylor Swift, pesquisei no google o gênero que é pop e decidi alterar "null" por "Pop" (como está escrita a maioria das suas músicas).
 
 SELECT COUNT (*) 
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
 WHERE main_country IS NULL;
 
--- Encontrado 1 valor nulo na coluna main_country, como a linha é da música Style da Taylor Swift, pesquisei no google o país que é Estados Unidos e decidi alterar "null" por "United States" (como está escrito nas suas outras músicas).
+> Encontrado 1 valor nulo na coluna main_country, como a linha é da música Style da Taylor Swift, pesquisei no google o país que é Estados Unidos e decidi alterar "null" por "United States" (como está escrito nas suas outras músicas).
 
 
 SELECT COUNT (*) 
@@ -99,11 +100,155 @@ SELECT *
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
 WHERE in_spotify_charts IS NULL;
 
--- Identificado 4 valores nulos na coluna in_spotify_charts. Como são poucos os valores nulos encontrados,pesquisei um por um no google e constatei que realmente não entraram no ranking, por isso vou considerar os "null" como "0".
+> Identificado 4 valores nulos na coluna in_spotify_charts. Como são poucos os valores nulos encontrados,pesquisei um por um no google e constatei que realmente não entraram no ranking, por isso vou considerar os "null" como "0".
 
 SELECT COUNT (*) 
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
 WHERE streams IS NULL;
+
+
+# Identificando valores duplicados na tabela "track_in_spotify"
+
+SELECT track_name, artists_name, 
+COUNT (*) AS Quantidade
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+GROUP BY track_name, artists_name
+HAVING COUNT (*) > 1;
+
+> Foram encontrados 8 grupos duplicados (track_name - artists_name): SNAP - Rosa Linn ; About Damn Time -	Lizzo; Take My Breath	- The Weeknd; SPIT IN MY FACE!	- ThxSoMch; The Astronaut	- Jin; Privileged Rappers	- Drake, 21 Savage; BackOutsideBoyz	- Drake; Broke Boys	- Drake, 21 Savage.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "SNAP" AND artists_name = "Rosa Linn" ;
+
+> Linhas duplicadas: SNAP - Rosa Linn. Como tem os mesmos valores das colunas mais relevantes, vou excluir a linha que parece faltar dados (track_id = 3814670) e manter a linha que aparentemente tem mais dados, in_spotify_chart preenchido (track_id = 5675634).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "About Damn Time" AND artists_name = "Lizzo" ;
+
+> Linhas duplicadas: About Damn Time -	Lizzo. Existem alguns valores relevantes diferentes, como o mês e o dia de lançamento, pesquisei no google e verifiquei que a data de lançamento da música foi 14 de Abril de 2022. Portanto, irei excluir a linha com a data errada (track_id = 5080031) e manter a linha com a data correta (track_id = 7173596).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Take My Breath" AND artists_name = "The Weeknd" ;
+
+> Linhas duplicadas: Take My Breath	- The Weeknd. Os valores das colunas mais relevantes estão iguais, porém o número de playlists e streams estão diferentes, pesquisei no google pra saber esses valores, não existe nada divulgado, mas encontrei uma informação importante (A música iniciou o ano de 2023 com cerca de 440 milhões de streams acumulados. Ao final de 2023, ela estava se aproximando da marca de 490 milhões.Ou seja, de forma estimada, recebeu cerca de 45 a 50 milhões de streams ao longo de 2023). Portanto, vou considerar o número de streams mais próximo desse valor, assim vou excluir a linha (track_id = 4586215) e manter a linha (track_id = 1119309).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "SPIT IN MY FACE!" AND artists_name = "ThxSoMch" ;
+
+> Linhas duplicadas: SPIT IN MY FACE!	- ThxSoMch. Os valores das colunas mais relevantes estão iguais, porém com playlists, rankins e streams diferentes, pesquisei no google e constatei que a música não entrou no ranking. Portanto, irei excluir a linha com o ranking 14 (track_id = 4967469) e manter a linha com a o ranking 0 (track_id = 8173823).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "The Astronaut" AND artists_name = "Jin" ;
+
+> Linhas duplicadas: The Astronaut	- Jin. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Privileged Rappers" AND artists_name = "Drake, 21 Savage" ;
+
+> Linhas duplicadas: Privileged Rappers	- Drake, 21 Savage. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "BackOutsideBoyz" AND artists_name = "Drake" ;
+
+> Linhas duplicadas: BackOutsideBoyz	- Drake. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Broke Boys" AND artists_name = "Drake, 21 Savage" ;
+
+> Linhas duplicadas: Broke Boys	- Drake, 21 Savage. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+> Identificando valores duplicados na tabela "track_in_spotify"
+
+SELECT track_name, artists_name, 
+COUNT (*) AS Quantidade
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+GROUP BY track_name, artists_name
+HAVING COUNT (*) > 1;
+
+> Foram encontrados 8 grupos duplicados (track_name - artists_name): SNAP - Rosa Linn ; About Damn Time -	Lizzo; Take My Breath	- The Weeknd; SPIT IN MY FACE!	- ThxSoMch; The Astronaut	- Jin; Privileged Rappers	- Drake, 21 Savage; BackOutsideBoyz	- Drake; Broke Boys	- Drake, 21 Savage.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "SNAP" AND artists_name = "Rosa Linn" ;
+
+> Linhas duplicadas: SNAP - Rosa Linn. Como tem os mesmos valores das colunas mais relevantes, vou excluir a linha que parece faltar dados (track_id = 3814670) e manter a linha que aparentemente tem mais dados, in_spotify_chart preenchido (track_id = 5675634).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "About Damn Time" AND artists_name = "Lizzo" ;
+
+> Linhas duplicadas: About Damn Time -	Lizzo. Existem alguns valores relevantes diferentes, como o mês e o dia de lançamento, pesquisei no google e verifiquei que a data de lançamento da música foi 14 de Abril de 2022. Portanto, irei excluir a linha com a data errada (track_id = 5080031) e manter a linha com a data correta (track_id = 7173596).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Take My Breath" AND artists_name = "The Weeknd" ;
+
+> Linhas duplicadas: Take My Breath	- The Weeknd. Os valores das colunas mais relevantes estão iguais, porém o número de playlists e streams estão diferentes, pesquisei no google pra saber esses valores, não existe nada divulgado, mas encontrei uma informação importante (A música iniciou o ano de 2023 com cerca de 440 milhões de streams acumulados. Ao final de 2023, ela estava se aproximando da marca de 490 milhões.Ou seja, de forma estimada, recebeu cerca de 45 a 50 milhões de streams ao longo de 2023). Portanto, vou considerar o número de streams mais próximo desse valor, assim vou excluir a linha (track_id = 4586215) e manter a linha (track_id = 1119309).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "SPIT IN MY FACE!" AND artists_name = "ThxSoMch" ;
+
+> Linhas duplicadas: SPIT IN MY FACE!	- ThxSoMch. Os valores das colunas mais relevantes estão iguais, porém com playlists, rankins e streams diferentes, pesquisei no google e constatei que a música não entrou no ranking. Portanto, irei excluir a linha com o ranking 14 (track_id = 4967469) e manter a linha com a o ranking 0 (track_id = 8173823).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "The Astronaut" AND artists_name = "Jin" ;
+
+> Linhas duplicadas: The Astronaut	- Jin. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Privileged Rappers" AND artists_name = "Drake, 21 Savage" ;
+
+> Linhas duplicadas: Privileged Rappers	- Drake, 21 Savage. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "BackOutsideBoyz" AND artists_name = "Drake" ;
+
+> Linhas duplicadas: BackOutsideBoyz	- Drake. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
+WHERE track_name = "Broke Boys" AND artists_name = "Drake, 21 Savage" ;
+
+-- Linhas duplicadas: Broke Boys	- Drake, 21 Savage. Todos os campos estão com os mesmos valores, portanto vou excluir a 2ª linha e manter a 1ª linha.
+
+
+# Identificando valores duplicados na tabela "track_in_competition"
+
+SELECT track_id,
+COUNT (*) AS Quantidade
+FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
+GROUP BY (track_id)
+HAVING COUNT (*) > 1;
+
+> Não existe nenhuma track_id duplicada. Portanto, agora vou excluir apenas as linhas das track_id que decidi excluir (linhas duplicadas) da tabela track_in_spotify: (track_id = 3814670) , (track_id = 5080031) , (track_id = 4586215) , (track_id = 4967469).
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
+WHERE track_id = "3814670";
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
+WHERE track_id = "5080031";
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
+WHERE track_id = "4586215";
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
+WHERE track_id = "4967469";
 
 
 
