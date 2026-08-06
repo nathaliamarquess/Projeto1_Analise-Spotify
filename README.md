@@ -1,7 +1,7 @@
 # Projeto1_Analise-Spotify
 Projeto de análise de dados do Spotify utilizando SQL no Google BigQuery e Looker Studio. Realizei limpeza, transformação e análise exploratória dos dados para responder perguntas de negócio, identificar padrões de streams e desenvolver um dashboard com os principais insights.
 
-# Identificando valores nulos na tabela "track_in_competition"
+# Tratamento dos valores nulos na tabela "track_in_competition"
 
 SELECT COUNT (*)
 FROM `projeto-1-spotify.desempenho_musical.track_in_competition`
@@ -47,7 +47,7 @@ REPLACE (COALESCE (in_shazam_charts, 0) AS in_shazam_charts)
 FROM `projeto-1-spotify.desempenho_musical.track_in_competition`;
 
 
-# Identificando valores nulos na tabela "track_in_spotify"
+# Tratamento dos valores nulos na tabela "track_in_spotify"
 
 SELECT COUNT (*) 
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`
@@ -124,7 +124,7 @@ REPLACE (
 FROM `projeto-1-spotify.desempenho_musical.track_in_spotify`;
 
 
-# Identificando valores duplicados na tabela "track_in_spotify_tratados"
+# Tratamento dos valores duplicados na tabela "track_in_spotify_tratados"
 
 SELECT track_name, artists_name, 
 COUNT (*) AS Quantidade
@@ -192,7 +192,7 @@ WHERE track_id NOT IN (
   3814670, 5080031, 4586215, 4967469
 );
 
-# Identificando valores duplicados na tabela "track_in_competition_tratados"
+# Tratamento dos valores duplicados na tabela "track_in_competition_tratados"
 
 SELECT track_id,
 COUNT (*) AS Quantidade
@@ -211,7 +211,7 @@ WHERE track_id NOT IN (
       "3814670", "5080031", "4586215", "4967469"  
 );
 
-# Identificando valores atípicos em variáveis categóricas na tabela "track_in_spotify_tratados" 
+# Tratamento dos valores atípicos em variáveis categóricas na tabela "track_in_spotify_tratados" 
 
 > Procurando na coluna nome da música. Encontrado nenhum.
 
