@@ -210,3 +210,62 @@ FROM `projeto-1-spotify.desempenho_musical.track_in_competition_tratados`
 WHERE track_id NOT IN (
       "3814670", "5080031", "4586215", "4967469"  
 );
+
+# Identificando valores atípicos em variáveis categóricas
+
+> Procurando na coluna nome da música. Encontrado nenhum.
+
+SELECT track_name, artists_name,
+COUNT (*) AS quantidade,
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`
+GROUP BY track_name, artists_name
+ORDER BY track_name ASC;
+
+> Procurando na coluna nome do artista. Encontrado nenhum.
+
+SELECT artists_name,
+COUNT (*) AS quantidade,
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`
+GROUP BY artists_name
+ORDER BY artists_name ASC;
+
+> Procurando na coluna gênero. Encontrei Disco pop e Disco-pop; existe um provável erro de preenchimento ou houve uma falha, pois está preenchido Main genre, não existe esse gênero; As Músicas com gênero preenchido "Main genre" são Something In The Way - Remastered 2021 do Nirvana e Smells Like Teen Spirit - Remastered 2021 do Nirvana, pesquisei no google e o gênero principal dessas músicas é: Rock. Irei substituir Main genre por Rock. E irei também substituir Disco pop por Disco-pop.
+
+SELECT  DISTINCT main_music_genre
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`
+ORDER BY main_music_genre ASC;
+
+SELECT *
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`
+WHERE main_music_genre = "Main genre";
+
+CREATE OR REPLACE TABLE `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados` AS
+SELECT *
+REPLACE (
+CASE
+WHEN main_music_genre = "Main genre" THEN "Rock"
+WHEN main_music_genre = "Disco pop" THEN "Disco-pop"
+ELSE main_music_genre
+END AS main_music_genre
+)
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`;
+
+> Procurando na coluna país. Encontrei USA e United States, vou substituir USA por Unite States. Encontrei MX e Mexico, vou substituir MX por Mexico. Encontrei PR e Puerto Rico, vou substituir PR por Puerto Rico.
+
+SELECT DISTINCT main_country,
+COUNT (*) AS quantidade,
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`
+GROUP BY main_country
+ORDER BY main_country ASC;
+
+CREATE OR REPLACE TABLE `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados` AS
+SELECT *
+REPLACE (
+  CASE
+  WHEN main_country = 'USA' THEN 'United States'
+  WHEN main_country = 'MX' THEN 'Mexico'
+  WHEN main_country = 'PR' THEN 'Puerto Rico'
+  ELSE main_country
+  END AS main_country
+)
+FROM `projeto-1-spotify.desempenho_musical.track_in_spotify_tratados`;
