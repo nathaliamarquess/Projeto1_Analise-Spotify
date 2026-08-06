@@ -211,7 +211,7 @@ WHERE track_id NOT IN (
       "3814670", "5080031", "4586215", "4967469"  
 );
 
-# Identificando valores atípicos em variáveis categóricas
+# Identificando valores atípicos em variáveis categóricas na tabela "track_in_spotify_tratados" 
 
 > Procurando na coluna nome da música. Encontrado nenhum.
 
